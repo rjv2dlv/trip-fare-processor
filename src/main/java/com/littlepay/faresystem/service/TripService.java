@@ -12,7 +12,7 @@ import java.util.ArrayList;
 
 public class TripService {
 
-    FareRepository fareRepository;
+    private final FareRepository fareRepository;
 
     public TripService(FareRepository fareRepository) {
         this.fareRepository = fareRepository;
@@ -44,34 +44,50 @@ public class TripService {
     }
 
     private Trip createTrip(Tap tapOn, Tap tapOff) {
-        Trip thisTrip = new Trip();
-        thisTrip.setStarted(tapOn.getDateTimeUTC());
-        thisTrip.setFromStopId(tapOn.getStopId());
-
         if(tapOff == null) {
-            thisTrip.setChargeAmount(fareRepository.getMaxFare(tapOn.getStopId()));
-            thisTrip.setStatus(TripStatus.INCOMPLETE);
-            thisTrip.setToStopId("");
+            return createIncompleteTrip(tapOn);
+        } else if(tapOn.getStopId().equals(tapOff.getStopId())) {
+            return createCancelledTrip(tapOn, tapOff);
+        } else {
+            return createCompletedTrip(tapOn, tapOff);
         }
-        else if(tapOn.getStopId().equals(tapOff.getStopId())) {
-            thisTrip.setFinished(tapOff.getDateTimeUTC());
-            thisTrip.setDurationSecs(Duration.between(tapOn.getDateTimeUTC(), tapOff.getDateTimeUTC()).getSeconds());
-            thisTrip.setChargeAmount(BigDecimal.ZERO);
-            thisTrip.setStatus(TripStatus.CANCELLED);
-            thisTrip.setToStopId(tapOff.getStopId());
-        }
-        else {
-            thisTrip.setFinished(tapOff.getDateTimeUTC());
-            thisTrip.setDurationSecs(Duration.between(tapOn.getDateTimeUTC(), tapOff.getDateTimeUTC()).getSeconds());
-            thisTrip.setChargeAmount(fareRepository.getFare(tapOn.getStopId(), tapOff.getStopId()));
-            thisTrip.setStatus(TripStatus.COMPLETED);
-            thisTrip.setToStopId(tapOff.getStopId());
-        }
+    }
 
-        thisTrip.setCompanyId(tapOn.getCompanyId());
-        thisTrip.setBusId(tapOn.getBusId());
-        thisTrip.setPan(tapOn.getPan());
+    private Trip createIncompleteTrip(Tap tapOn) {
+        Trip incompleteTrip = baseTrip(tapOn);
+        incompleteTrip.setChargeAmount(fareRepository.getMaxFare(tapOn.getStopId()));
+        incompleteTrip.setStatus(TripStatus.INCOMPLETE);
+        incompleteTrip.setToStopId("");
+        return incompleteTrip;
+    }
 
-        return thisTrip;
+    private Trip createCancelledTrip(Tap tapOn, Tap tapOff) {
+        Trip cancelledTrip = baseTrip(tapOn);
+        cancelledTrip.setFinished(tapOff.getDateTimeUTC());
+        cancelledTrip.setDurationSecs(Duration.between(tapOn.getDateTimeUTC(), tapOff.getDateTimeUTC()).getSeconds());
+        cancelledTrip.setChargeAmount(BigDecimal.ZERO);
+        cancelledTrip.setStatus(TripStatus.CANCELLED);
+        cancelledTrip.setToStopId(tapOff.getStopId());
+        return cancelledTrip;
+    }
+
+    private Trip createCompletedTrip(Tap tapOn, Tap tapOff) {
+        Trip completedTrip = baseTrip(tapOn);
+        completedTrip.setFinished(tapOff.getDateTimeUTC());
+        completedTrip.setDurationSecs(Duration.between(tapOn.getDateTimeUTC(), tapOff.getDateTimeUTC()).getSeconds());
+        completedTrip.setChargeAmount(fareRepository.getFare(tapOn.getStopId(), tapOff.getStopId()));
+        completedTrip.setStatus(TripStatus.COMPLETED);
+        completedTrip.setToStopId(tapOff.getStopId());
+        return completedTrip;
+    }
+
+    private Trip baseTrip(Tap tapOn) {
+        Trip baseTrip = new Trip();
+        baseTrip.setStarted(tapOn.getDateTimeUTC());
+        baseTrip.setFromStopId(tapOn.getStopId());
+        baseTrip.setCompanyId(tapOn.getCompanyId());
+        baseTrip.setBusId(tapOn.getBusId());
+        baseTrip.setPan(tapOn.getPan());
+        return baseTrip;
     }
 }

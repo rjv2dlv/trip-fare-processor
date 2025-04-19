@@ -34,7 +34,7 @@ public class TripCsvWriter {
                         currentTrip.getCompanyId(),
                         currentTrip.getBusId(),
                         currentTrip.getPan(),
-                        currentTrip.getStatus()
+                        currentTrip.getStatus().name()
                 );
 
                 bufferedWriter.write(record);

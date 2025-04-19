@@ -2,6 +2,7 @@ package com.littlepay.faresystem.service;
 
 import com.littlepay.faresystem.model.Tap;
 import com.littlepay.faresystem.model.Trip;
+import com.littlepay.faresystem.model.TripStatus;
 
 import java.math.BigDecimal;
 import java.time.Duration;
@@ -49,21 +50,21 @@ public class TripService {
 
         if(tapOff == null) {
             thisTrip.setChargeAmount(fareRepository.getMaxFare(tapOn.getStopId()));
-            thisTrip.setStatus("INCOMPLETE");
+            thisTrip.setStatus(TripStatus.INCOMPLETE);
             thisTrip.setToStopId("");
         }
         else if(tapOn.getStopId().equals(tapOff.getStopId())) {
             thisTrip.setFinished(tapOff.getDateTimeUTC());
             thisTrip.setDurationSecs(Duration.between(tapOn.getDateTimeUTC(), tapOff.getDateTimeUTC()).getSeconds());
             thisTrip.setChargeAmount(BigDecimal.ZERO);
-            thisTrip.setStatus("CANCELLED");
+            thisTrip.setStatus(TripStatus.CANCELLED);
             thisTrip.setToStopId(tapOff.getStopId());
         }
         else {
             thisTrip.setFinished(tapOff.getDateTimeUTC());
             thisTrip.setDurationSecs(Duration.between(tapOn.getDateTimeUTC(), tapOff.getDateTimeUTC()).getSeconds());
             thisTrip.setChargeAmount(fareRepository.getFare(tapOn.getStopId(), tapOff.getStopId()));
-            thisTrip.setStatus("COMPLETED");
+            thisTrip.setStatus(TripStatus.COMPLETED);
             thisTrip.setToStopId(tapOff.getStopId());
         }
 

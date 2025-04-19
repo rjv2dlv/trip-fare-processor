@@ -16,5 +16,5 @@ public class Trip {
     private String companyId;
     private String busId;
     private String pan;
-    private String status;
+    private TripStatus status;
 }

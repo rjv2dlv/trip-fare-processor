@@ -1,10 +1,13 @@
 package com.littlepay.faresystem.service;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.*;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 public class CsvFareRepository implements FareRepository {
 
     private static final Map<String, Map<String, BigDecimal>> tripFaresMap = new HashMap<>();
@@ -24,6 +27,7 @@ public class CsvFareRepository implements FareRepository {
             try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
                 bufferedReader.readLine();
 
+                int tripRecordNumber = 0;
                 String tripRecord;
                 while ((tripRecord = bufferedReader.readLine()) != null) {
                     String[] tripRecordFields = tripRecord.split(",");
@@ -33,7 +37,9 @@ public class CsvFareRepository implements FareRepository {
 
                     addFare(sourceStop, destinationStop, tripFare);       // Add source to destination fare.
                     addFare(destinationStop, sourceStop, tripFare);       // Add destination to source fare.
+                    tripRecordNumber ++;
                 }
+                log.info("Added fares for {} source and destinations.", tripRecordNumber);
             }
         } catch (IOException e) {
             throw new RuntimeException("Error reading trip fares file: " + e.getMessage(), e);
@@ -56,6 +62,7 @@ public class CsvFareRepository implements FareRepository {
             }
             tripMaxFares.put(currentStop, maxFare);
         }
+        log.info("Max fares added for {} stops", tripMaxFares.size());
     }
 
     @Override

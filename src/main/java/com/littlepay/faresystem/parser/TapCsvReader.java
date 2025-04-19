@@ -2,12 +2,14 @@ package com.littlepay.faresystem.parser;
 
 import com.littlepay.faresystem.model.Tap;
 import com.littlepay.faresystem.utils.Constants;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 public class TapCsvReader {
     public static List<Tap> getTapsFromFile(String inputFile) throws IOException {
         List<Tap> taps = new ArrayList<>();
@@ -28,7 +30,7 @@ public class TapCsvReader {
                     String[] fields = record.split(",");
                     if(fields.length < 7) {
                         skippedRecords ++;
-                        System.err.println("Skipping malformed record #" + recordNumber + ": Insufficient fields");
+                        log.error("Skipping malformed record #" + recordNumber + ": Insufficient fields");
                         continue;
                     }
                     Tap currentTap = new Tap();
@@ -42,12 +44,10 @@ public class TapCsvReader {
                     taps.add(currentTap);
                 }
                 catch (Exception ex) {
-                    System.out.println("Skipping record. Issue reading and parsing the record: " + recordNumber);
+                    log.error("Skipping record. Issue reading and parsing the record: {}", recordNumber);
                 }
             }
-            System.out.println("Updated " + recordNumber + " records, skipped: " + skippedRecords + " records.");
-        } catch (FileNotFoundException e) {
-            throw e;
+            log.info("Updated {} records, skipped: {} records.", recordNumber, skippedRecords);
         } catch (IOException e) {
             throw e;
         }

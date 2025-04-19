@@ -9,7 +9,7 @@ public class Tap {
     private int id;
     private LocalDateTime dateTimeUTC;
     private String tapType;
-    private String tapId;
+    private String stopId;
     private String companyId;
     private String busId;
     private String pan;

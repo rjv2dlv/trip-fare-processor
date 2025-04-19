@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class TapOrganiserTest {
     @Test
-    void shouldGroupAndSortTapsByPan() {
+    void testGroupAndSortTapsByPan() {
         Tap tap1 = createTap("5500005555555559", LocalDateTime.parse("2023-01-22T13:04:00"));
         Tap tap2 = createTap("4111111111111111", LocalDateTime.parse("2023-01-22T12:02:00"));
         Tap tap3 = createTap("5500005555555559", LocalDateTime.parse("2023-01-22T11:05:00"));
@@ -34,22 +34,28 @@ public class TapOrganiserTest {
     }
 
     @Test
-    void shouldReturnEmptyMapForEmptyInput() {
+    void testEmptyMapForEmptyInput() {
         Map<String, List<Tap>> result = TapOrganiser.groupAndSortTapsByPan(Collections.emptyList());
         Assertions.assertTrue(result.isEmpty());
     }
 
     @Test
-    void shouldSortTapsChronologicallyForEachPan() {
-        Tap later = createTap("4111111111111111", LocalDateTime.parse("2023-01-22T13:00:00"));
-        Tap earlier = createTap("4111111111111111", LocalDateTime.parse("2023-01-22T12:08:00"));
+    void testSortTapsChronologicallyForEachPan() {
+        Tap tap1 = createTap("4111111111111111", LocalDateTime.parse("2023-01-22T13:00:00"));
+        Tap tap2 = createTap("4111111111111111", LocalDateTime.parse("2023-01-22T12:08:00"));
+        Tap tap3 = createTap("4111111111111111", LocalDateTime.parse("2023-01-22T12:07:00"));
+        Tap tap4 = createTap("4111111111111111", LocalDateTime.parse("2023-01-22T13:09:00"));
+        Tap tap5 = createTap("4111111111111111", LocalDateTime.parse("2023-01-22T11:22:00"));
 
-        Map<String, List<Tap>> result = TapOrganiser.groupAndSortTapsByPan(List.of(later, earlier));
+        Map<String, List<Tap>> result = TapOrganiser.groupAndSortTapsByPan(List.of(tap1, tap2, tap3, tap4, tap5));
 
         List<Tap> taps = result.get("4111111111111111");
-        Assertions.assertEquals(2, taps.size());
-        Assertions.assertEquals(earlier, taps.get(0));
-        Assertions.assertEquals(later, taps.get(1));
+        Assertions.assertEquals(5, taps.size());
+        Assertions.assertEquals(tap5, taps.get(0));
+        Assertions.assertEquals(tap3, taps.get(1));
+        Assertions.assertEquals(tap2, taps.get(2));
+        Assertions.assertEquals(tap1, taps.get(3));
+        Assertions.assertEquals(tap4, taps.get(4));
     }
 
     private Tap createTap(String pan, LocalDateTime dateTime) {

@@ -11,30 +11,33 @@ import java.nio.file.Paths;
 import java.util.List;
 
 public class TripCsvWriter {
+    private static final String CSV_HEADER = "Started, Finished, DurationSecs, FromStopId, ToStopId, ChargeAmount, CompanyId, BusID, PAN, Status";
+
     public static void writeTripsToFile(List<Trip> trips, String outputFilename) throws IOException {
         Path outputPath = Paths.get("src/main/resources/" + outputFilename);
         try (BufferedWriter bufferedWriter = Files.newBufferedWriter(outputPath)) {
-            bufferedWriter.write("Started, Finished, DurationSecs, FromStopId, ToStopId, ChargeAmount, CompanyId, BusID, PAN, Status");
+            bufferedWriter.write(CSV_HEADER);
             bufferedWriter.newLine();
 
-            for(Trip currentTrip : trips) {
+            for (Trip currentTrip : trips) {
                 String started = currentTrip.getStarted() != null ? currentTrip.getStarted().format(Constants.DATE_TIME_FORMATTER) : "";
                 String finished = currentTrip.getFinished() != null ? currentTrip.getFinished().format(Constants.DATE_TIME_FORMATTER) : "";
                 String toStop = currentTrip.getToStopId() != null ? currentTrip.getToStopId() : "";
 
-                StringBuilder tripStringBuilder = new StringBuilder();
-                tripStringBuilder.append(started).append(",");
-                tripStringBuilder.append(finished).append(",");
-                tripStringBuilder.append(currentTrip.getDurationSecs()).append(",");
-                tripStringBuilder.append(currentTrip.getFromStopId()).append(",");
-                tripStringBuilder.append(toStop).append(",");
-                tripStringBuilder.append("$").append(currentTrip.getChargeAmount()).append(",");
-                tripStringBuilder.append(currentTrip.getCompanyId()).append(",");
-                tripStringBuilder.append(currentTrip.getBusId()).append(",");
-                tripStringBuilder.append(currentTrip.getPan()).append(",");
-                tripStringBuilder.append(currentTrip.getStatus());
+                String record = String.join(",",
+                        started,
+                        finished,
+                        String.valueOf(currentTrip.getDurationSecs()),
+                        currentTrip.getFromStopId(),
+                        toStop,
+                        "$" + currentTrip.getChargeAmount(),
+                        currentTrip.getCompanyId(),
+                        currentTrip.getBusId(),
+                        currentTrip.getPan(),
+                        currentTrip.getStatus()
+                );
 
-                bufferedWriter.write(tripStringBuilder.toString());
+                bufferedWriter.write(record);
                 bufferedWriter.newLine();
             }
         }

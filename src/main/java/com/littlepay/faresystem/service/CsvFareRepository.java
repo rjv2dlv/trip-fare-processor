@@ -1,16 +1,22 @@
-package com.littlepay.faresystem.config;
+package com.littlepay.faresystem.service;
 
 import java.io.*;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TripFaresConfig {
+public class CsvFareRepository implements FareRepository {
+
     private static final Map<String, Map<String, BigDecimal>> tripFaresMap = new HashMap<>();
     private static final Map<String, BigDecimal> tripMaxFares = new HashMap<>();
 
-    public static void loadTripFares(String tripsFareFile) throws FileNotFoundException {
-        try (InputStream inputStream = TripFaresConfig.class.getClassLoader().getResourceAsStream(tripsFareFile)) {
+    public CsvFareRepository(String tripFareFile) {
+        loadTripFares(tripFareFile);
+        loadMaxFares();
+    }
+
+    private void loadTripFares(String tripsFareFile) {
+        try (InputStream inputStream = CsvFareRepository.class.getClassLoader().getResourceAsStream(tripsFareFile)) {
             if (inputStream == null) {
                 throw new FileNotFoundException("Trip fares file not found under resources: " + tripsFareFile);
             }
@@ -25,22 +31,22 @@ public class TripFaresConfig {
                     String destinationStop = tripRecordFields[1].trim();
                     BigDecimal tripFare = new BigDecimal(tripRecordFields[2].trim());
 
-                    updateCurrentTripFare(sourceStop, destinationStop, tripFare);       // Add source to destination fare.
-                    updateCurrentTripFare(destinationStop, sourceStop, tripFare);       // Add destination to source fare.
+                    addFare(sourceStop, destinationStop, tripFare);       // Add source to destination fare.
+                    addFare(destinationStop, sourceStop, tripFare);       // Add destination to source fare.
                 }
             }
-        } catch (IOException | NullPointerException e) {
+        } catch (IOException e) {
             throw new RuntimeException("Error reading trip fares file: " + e.getMessage(), e);
         }
     }
 
-    private static void updateCurrentTripFare(String source, String destination, BigDecimal tripFare) {
+    private void addFare(String source, String destination, BigDecimal tripFare) {
         Map<String, BigDecimal> currentSourceTrip = tripFaresMap.getOrDefault(source, new HashMap<>());
         currentSourceTrip.put(destination, tripFare);
         tripFaresMap.put(source, currentSourceTrip);
     }
 
-    public static void loadMaxFaresForEachStop() {
+    private void loadMaxFares() {
         for (String currentStop : tripFaresMap.keySet()) {
             Map<String, BigDecimal> currentStopFares = tripFaresMap.get(currentStop);
 
@@ -52,11 +58,13 @@ public class TripFaresConfig {
         }
     }
 
-    public static BigDecimal getFare(String sourceStop, String destinationStop) {
+    @Override
+    public BigDecimal getFare(String sourceStop, String destinationStop) {
         return sourceStop.equals(destinationStop) ? BigDecimal.ZERO : tripFaresMap.get(sourceStop).get(destinationStop);
     }
 
-    public static BigDecimal getMaxTripFare(String stop) {
+    @Override
+    public BigDecimal getMaxFare(String stop) {
         return tripMaxFares.get(stop);
     }
 }

@@ -5,7 +5,6 @@ import com.littlepay.faresystem.utils.Constants;
 
 import java.io.*;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +12,7 @@ public class TapCsvReader {
     public static List<Tap> getTapsFromFile(String inputFile) throws IOException {
         List<Tap> taps = new ArrayList<>();
         int recordNumber = 0;
+        int skippedRecords = 0;
         InputStream inputStream = Tap.class.getClassLoader().getResourceAsStream(inputFile);
         if (inputStream == null) {
             throw new FileNotFoundException("Input file not found in resources: " + inputFile);
@@ -21,11 +21,16 @@ public class TapCsvReader {
         try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
             br.readLine(); // skip header (record #1)
             String record;
-            recordNumber ++;
 
             while ((record = br.readLine()) != null) {
+                recordNumber ++;
                 try {
                     String[] fields = record.split(",");
+                    if(fields.length < 7) {
+                        skippedRecords ++;
+                        System.err.println("Skipping malformed record #" + recordNumber + ": Insufficient fields");
+                        continue;
+                    }
                     Tap currentTap = new Tap();
                     currentTap.setId(Integer.parseInt(fields[0].trim()));
                     currentTap.setDateTimeUTC(LocalDateTime.parse(fields[1].trim(), Constants.DATE_TIME_FORMATTER));
@@ -40,6 +45,7 @@ public class TapCsvReader {
                     System.out.println("Skipping record. Issue reading and parsing the record: " + recordNumber);
                 }
             }
+            System.out.println("Updated " + recordNumber + " records, skipped: " + skippedRecords + " records.");
         } catch (FileNotFoundException e) {
             throw e;
         } catch (IOException e) {

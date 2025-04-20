@@ -47,7 +47,7 @@ public class TapCsvReader {
                     log.error("Skipping record. Issue reading and parsing the record: {}", recordNumber);
                 }
             }
-            log.info("Updated {} records, skipped: {} records.", recordNumber, skippedRecords);
+            log.info("Total {} records, skipped: {} records.", recordNumber, skippedRecords);
         } catch (IOException e) {
             throw e;
         }

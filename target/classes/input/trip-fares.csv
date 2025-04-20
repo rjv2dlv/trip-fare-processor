@@ -2,3 +2,6 @@ from, to, fare
 Stop1, Stop2, 3.25
 Stop2, Stop3, 5.50
 Stop1, Stop3, 7.30
+Stop3, Stop4, 11.50
+Stop1, Stop4, 8.90
+Stop2, Stop5, 9.90

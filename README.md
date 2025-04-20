@@ -13,6 +13,7 @@ It uses a configurable fare from an input file and outputs the final trips in CS
 2. Fares are symmetric. Eg: traveling from StopA to StopB costs the same as StopB to StopA.
 3. Lombok is used to reduce boilerplate code (e.g., getters, setters, logging).
 4. BigDecimal is used for fare calculations to ensure precision, even though it's not the most performant data type.
+5. The input file is well-formed and is not missing data.
 
 
 ## How to Build and Run the Project
@@ -35,6 +36,24 @@ The project includes a JUnit-based test suite to validate fare calculations, tri
 
 **To run the tests**
 ```mvn test```
+
+## Input, Output, trip fares and config file paths
+
+### Input file:
+The input file path can be provided in the application.properties file in the field: ```input.file.name```
+The default input file path and file name is ```src/main/resources/input/taps.csv```
+
+### Output file:
+The output file path can be provided in the application.properties file in the field: ```output.file.name```
+The default output file path and file name is ```src/main/resources/output/trips.csv```
+
+### Trip fares file:
+The trip fares can be configured under a csv file. The file path can be provided in the application.properties file in the field: ```trip.fares.file.name```
+The default trip fares file path and file name is ```src/main/resources/input/trip-fares.csv```
+
+### application.properties file:
+The application.properties file contains configurations for input, output, trip fares files.
+It can be extended further to add any configurations that maybe required for the application to use.
 
 
 ## Sample Files

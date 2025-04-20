@@ -58,7 +58,7 @@ It can be extended further to add any configurations that maybe required for the
 
 ## Sample Files
 
-### Fare Configuration (`fare_config.csv`)
+### Fare Configuration (`trip_fares.csv`)
     from, to, fare
     Stop1, Stop2, 3.25
     Stop2, Stop3, 5.50
